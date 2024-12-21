@@ -1,48 +1,60 @@
 package pablo.ruiz.handling
 
+import CommercialFormUI
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import pablo.ruiz.handling.sectionB.ExceptionHandlingUI
 
-// Custom exception class
-class DateOutOfRangeException(message: String) : Exception(message)
-
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val inputDate = "2025-07-01"
-
-        try {
-            // Parse the input date
-            val selectedDate = LocalDate.parse(inputDate, dateFormatter)
-
-            // Validate the date
-            validateDate(selectedDate)
-            Toast.makeText(this, "The selected date $selectedDate is within the allowed range", Toast.LENGTH_LONG).show()
-
-        } catch (e: DateOutOfRangeException) {
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Invalid input. Please enter a valid date in the format yyyy-MM-dd", Toast.LENGTH_LONG).show()
+        setContent {
+            AppNavigator()
         }
     }
+}
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun validateDate(selectedDate: LocalDate) {
-        val today = LocalDate.now()
-        val maxAllowedDate = today.plus(6, ChronoUnit.MONTHS)
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun AppNavigator() {
+    var selectedSection by remember { mutableStateOf("SectionA") }
 
-        if (selectedDate.isAfter(maxAllowedDate)) {
-            throw DateOutOfRangeException("Selected date exceeds the 6-month limit")
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Select a Section", style = MaterialTheme.typography.headlineLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row {
+            Button(onClick = { selectedSection = "SectionA" }, modifier = Modifier.padding(8.dp)) {
+                Text("Section A")
+            }
+            Button(onClick = { selectedSection = "SectionB" }, modifier = Modifier.padding(8.dp)) {
+                Text("Section B")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        when (selectedSection) {
+            "SectionA" -> CommercialFormUI()
+            "SectionB" -> ExceptionHandlingUI()
         }
     }
 }
